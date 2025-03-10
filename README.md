@@ -1,6 +1,5 @@
 # get-started-with-ar-on-the-web
-
-
+ZAl,m
 ## About this repository
 
 This is the project repository is based on the Medium post ["Get started with Augmented Reality on the web using WebXR and Three.js"](https://medium.com/sopra-steria-norge/get-started-with-augmented-reality-on-the-web-using-three-js-and-webxr-part-1-8b07757fc23a).

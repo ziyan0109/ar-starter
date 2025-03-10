@@ -32,12 +32,12 @@ export function createScene(renderer: WebGLRenderer) {
 
   //add koala
 
-  let koalaModel: Object3D;
+  let GLBModel: Object3D;
 
   const gltfLoader = new GLTFLoader();
-
-  gltfLoader.load("../assets/models/koala.glb", (gltf: GLTF) => {
-    koalaModel = gltf.scene.children[0];
+  //CHANGE ME\\
+  gltfLoader.load("../assets/models/shanshan.glb", (gltf: GLTF) => {
+    GLBModel = gltf.scene.children[0];
   });
 
   //add controller
@@ -67,12 +67,12 @@ export function createScene(renderer: WebGLRenderer) {
 
   function onSelect() {
     if (planeMarker.visible) {
-      const model = koalaModel.clone();
+      const model = GLBModel.clone();
 
       model.position.setFromMatrixPosition(planeMarker.matrix);
 
       // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.y = Math.random() * (Math.PI * 2);
+      model.rotation.y =  (Math.PI);
       model.visible = true;
 
       scene.add(model);
