@@ -73,7 +73,12 @@ export function createScene(renderer: WebGLRenderer) {
 
       // Rotate the model randomly to give a bit of variation to the scene.
       // model.rotation.y =  (Math.PI);
-      model.lookAt(camera.position);
+      // model.lookAt(camera.position);
+      const cameraPosition = camera.position.clone();
+      cameraPosition.y = model.position.y; // Keep Y level the same
+
+      model.lookAt(cameraPosition);
+
       model.visible = true;
 
       scene.add(model);
