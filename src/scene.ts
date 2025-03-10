@@ -72,7 +72,8 @@ export function createScene(renderer: WebGLRenderer) {
       model.position.setFromMatrixPosition(planeMarker.matrix);
 
       // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.y =  (Math.PI);
+      // model.rotation.y =  (Math.PI);
+      model.lookAt(camera.position);
       model.visible = true;
 
       scene.add(model);
