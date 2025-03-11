@@ -1,96 +1,88 @@
 import { createPlaneMarker } from "./objects/PlaneMarker";
-// import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { handleXRHitTest } from "./utils/hitTest";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
-
 import {
-  AmbientLight,
-  BoxBufferGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  Object3D,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-  XRFrame,
+AmbientLight,
+BoxBufferGeometry,
+Mesh,
+MeshBasicMaterial,
+Object3D,
+PerspectiveCamera,
+Scene,
+WebGLRenderer,
+XRFrame,
 } from "three";
 
+// Array to store placed models
+const placedModels: Object3D[] = [];
+const ROTATION_SPEED = 0.02; // Adjust this value to change rotation speed
 
 export function createScene(renderer: WebGLRenderer) {
-  const scene = new Scene()
+const scene = new Scene()
 
-  const camera = new PerspectiveCamera(
-      70,
-      window.innerWidth / window.innerHeight,
-      0.02,
-      20,
-  )
+const camera = new PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    0.02,
+    20,
+)
 
-  //Add hit plane marker
-  const planeMarker = createPlaneMarker();
+const planeMarker = createPlaneMarker();
+scene.add(planeMarker);
 
-  scene.add(planeMarker);
+let FBXModel: Object3D;
 
-  //add koala
+const fbxLoader = new FBXLoader();
+fbxLoader.load("../assets/models/shanshan.fbx", (fbx: Object3D) => {
+  FBXModel = fbx;
+  FBXModel.scale.set(0.001,0.001,0.001);
+});
 
-  let FBXModel: Object3D;
+const controller = renderer.xr.getController(0);
+scene.add(controller);
 
-  const fbxLoader = new FBXLoader();
-  //CHANGE ME\\
-  fbxLoader.load("../assets/models/shanshan.fbx", (fbx: Object3D) => {
-    FBXModel = fbx;
-    FBXModel.scale.set(0.001,0.001,0.001);
-  });
+const renderLoop = (timestamp: number, frame?: XRFrame) => {
+  if (renderer.xr.isPresenting) {
+    // Rotate all placed models
+    placedModels.forEach(model => {
+      model.rotation.y += ROTATION_SPEED;
+    });
 
-  //add controller
-  const controller = renderer.xr.getController(0);
-  scene.add(controller);
-
-  const renderLoop = (timestamp: number, frame?: XRFrame) => {
-    if (renderer.xr.isPresenting) {
-
-      //if find surface, render floor marker as visible
-      if (frame) {
-        handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
-          if (hitPoseTransformed) {
-            planeMarker.visible = true;
-            planeMarker.matrix.fromArray(hitPoseTransformed);
-          }
-        }, () => {
-          planeMarker.visible = false;
-        })
-      }
-      renderer.render(scene, camera);
+    if (frame) {
+      handleXRHitTest(renderer, frame, (hitPoseTransformed: Float32Array) => {
+        if (hitPoseTransformed) {
+          planeMarker.visible = true;
+          planeMarker.matrix.fromArray(hitPoseTransformed);
+        }
+      }, () => {
+        planeMarker.visible = false;
+      })
     }
+    renderer.render(scene, camera);
   }
+}
 
-  //if user press screen show koala
-  controller.addEventListener("select", onSelect);
+controller.addEventListener("select", onSelect);
 
-  function onSelect() {
-    if (planeMarker.visible) {
-      const model = FBXModel.clone();
+function onSelect() {
+  if (planeMarker.visible) {
+    const model = FBXModel.clone();
+    model.position.setFromMatrixPosition(planeMarker.matrix);
 
-      model.position.setFromMatrixPosition(planeMarker.matrix);
+    const cameraPosition = camera.position.clone();
+    cameraPosition.y = model.position.y;
+    model.lookAt(cameraPosition);
+    model.visible = true;
 
-      // Rotate the model randomly to give a bit of variation to the scene.
-      // model.rotation.y =  (Math.PI);
-      // model.lookAt(camera.position);
-      const cameraPosition = camera.position.clone();
-      cameraPosition.y = model.position.y; // Keep Y level the same
-
-      model.lookAt(cameraPosition);
-
-      model.visible = true;
-
-      scene.add(model);
-    }
+    // Add the model to both the scene and our tracking array
+    scene.add(model);
+    placedModels.push(model);
   }
+}
 
-  //add light
-  const ambientLight = new AmbientLight(0xffffff, 1.0);
-  scene.add(ambientLight);
+const ambientLight = new AmbientLight(0xffffff, 1.0);
+scene.add(ambientLight);
 
-  renderer.setAnimationLoop(renderLoop);
+renderer.setAnimationLoop(renderLoop);
 };
