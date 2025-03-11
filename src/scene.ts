@@ -1,6 +1,8 @@
 import { createPlaneMarker } from "./objects/PlaneMarker";
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+// import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { handleXRHitTest } from "./utils/hitTest";
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+
 
 import {
   AmbientLight,
@@ -32,12 +34,13 @@ export function createScene(renderer: WebGLRenderer) {
 
   //add koala
 
-  let koalaModel: Object3D;
+  let FBXModel: Object3D;
 
-  const gltfLoader = new GLTFLoader();
-
-  gltfLoader.load("../assets/models/koala.glb", (gltf: GLTF) => {
-    koalaModel = gltf.scene.children[0];
+  const fbxLoader = new FBXLoader();
+  //CHANGE ME\\
+  fbxLoader.load("../assets/models/shanshan.glb", (fbx: Object3D) => {
+    FBXModel = fbx;
+    FBXModel.scale.set(1,1,1);
   });
 
   //add controller
@@ -67,12 +70,18 @@ export function createScene(renderer: WebGLRenderer) {
 
   function onSelect() {
     if (planeMarker.visible) {
-      const model = koalaModel.clone();
+      const model = FBXModel.clone();
 
       model.position.setFromMatrixPosition(planeMarker.matrix);
 
       // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.y = Math.random() * (Math.PI * 2);
+      // model.rotation.y =  (Math.PI);
+      // model.lookAt(camera.position);
+      const cameraPosition = camera.position.clone();
+      cameraPosition.y = model.position.y; // Keep Y level the same
+
+      model.lookAt(cameraPosition);
+
       model.visible = true;
 
       scene.add(model);
