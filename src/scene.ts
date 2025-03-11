@@ -38,9 +38,9 @@ export function createScene(renderer: WebGLRenderer) {
 
   const fbxLoader = new FBXLoader();
   //CHANGE ME\\
-  fbxLoader.load("../assets/models/shanshan.glb", (fbx: Object3D) => {
+  fbxLoader.load("../assets/models/shanshan.fbx", (fbx: Object3D) => {
     FBXModel = fbx;
-    FBXModel.scale.set(1,1,1);
+    FBXModel.scale.set(0.001,0.001,0.001);
   });
 
   //add controller
